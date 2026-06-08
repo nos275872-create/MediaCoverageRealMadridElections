@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Batalla de los Medios — RM 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1120;
+    --surface: #111827;
+    --surface2: #1e2d45;
+    --border: #1e293b;
+    --blue: #1d4ed8;
+    --blue-light: #3b82f6;
+    --blue-pale: #1e3a5f;
+    --amber: #d97706;
+    --amber-light: #f59e0b;
+    --amber-pale: #3d2000;
+    --neutral: #64748b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --green: #10b981;
+    --red: #ef4444;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── TABS ── */
+  .tab-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,17,32,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 2rem; gap: 0;
+  }
+  .tab-bar-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    padding-right: 2rem;
+    border-right: 1px solid var(--border);
+    margin-right: 1.5rem;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 0.875rem; font-weight: 500;
+    padding: 1rem 1.25rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--text);
+    border-bottom-color: var(--amber-light);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; overflow: hidden;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    background: linear-gradient(180deg, #0d1b30 0%, var(--bg) 100%);
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(29,78,216,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--amber-light);
+    margin-bottom: 1rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900; line-height: 1.1;
+    background: linear-gradient(135deg, #e2e8f0 30%, #94a3b8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  .hero-subtitle {
+    color: var(--text-muted); font-size: 1rem; max-width: 600px; margin: 0 auto 3rem;
+  }
+
+  /* ── CANDIDATE CARDS ── */
+  .candidates {
+    display: flex; justify-content: center; align-items: flex-start;
+    gap: 3rem; flex-wrap: wrap; margin-bottom: 0;
+  }
+  .vs-badge {
+    display: flex; align-items: center; justify-content: center;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--surface2); color: var(--text-dim);
+    font-weight: 700; font-size: 0.8rem;
+    align-self: center; flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .candidate-card {
+    display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+    max-width: 180px;
+  }
+  .avatar {
+    width: 100px; height: 100px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; font-weight: 700;
+    border: 3px solid;
+    position: relative;
+  }
+  .avatar-f {
+    background: radial-gradient(circle at 35% 35%, #2563eb, #1e3a5f);
+    border-color: #3b82f6;
+    color: #bfdbfe;
+    box-shadow: 0 0 40px rgba(59,130,246,0.3);
+  }
+  .avatar-r {
+    background: radial-gradient(circle at 35% 35%, #d97706, #3d2000);
+    border-color: #f59e0b;
+    color: #fde68a;
+    box-shadow: 0 0 40px rgba(245,158,11,0.3);
+  }
+  .cand-name {
+    font-weight: 700; font-size: 1rem;
+    text-align: center;
+  }
+  .cand-name.blue { color: var(--blue-light); }
+  .cand-name.amber { color: var(--amber-light); }
+  .cand-role { font-size: 0.75rem; color: var(--text-dim); text-align: center; }
+  .cand-stats {
+    display: flex; flex-direction: column; align-items: center; gap: 0.3rem;
+    margin-top: 0.25rem;
+  }
+  .stat-pill {
+    padding: 0.2rem 0.7rem; border-radius: 20px;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
+  }
+  .pill-blue { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); }
+  .pill-amber { background: rgba(245,158,11,0.15); color: #fcd34d; border: 1px solid rgba(245,158,11,0.2); }
+  .pill-neutral { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+
+  /* ── SECTION ── */
+  .section {
+    max-width: 1200px; margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  .section-header {
+    display: flex; align-items: baseline; gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .section-label {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--amber-light);
+    white-space: nowrap;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 700; color: var(--text);
+  }
+  .section-divider {
+    flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── KPI GRID ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem; margin-bottom: 3rem;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .kpi-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.blue::after { background: linear-gradient(90deg, var(--blue), transparent); }
+  .kpi-card.amber::after { background: linear-gradient(90deg, var(--amber-light), transparent); }
+  .kpi-card.neutral::after { background: linear-gradient(90deg, var(--neutral), transparent); }
+  .kpi-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem; }
+  .kpi-value { font-size: 2.25rem; font-weight: 800; line-height: 1; }
+  .kpi-value.blue { color: var(--blue-light); }
+  .kpi-value.amber { color: var(--amber-light); }
+  .kpi-value.neutral { color: var(--text-muted); }
+  .kpi-desc { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.5rem; }
+
+  /* ── CHART CARDS ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.75rem;
+    margin-bottom: 2rem;
+  }
+  .chart-title {
+    font-weight: 700; font-size: 1rem;
+    color: var(--text); margin-bottom: 0.25rem;
+  }
+  .chart-subtitle { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.5rem; }
+  .chart-wrap { position: relative; }
+  .chart-wrap.tall { height: 640px; }
+  .chart-wrap.medium { height: 380px; }
+  .chart-wrap.short { height: 280px; }
+
+  /* ── TWO-COL ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 1rem;
+    margin-top: 1rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── ANNOTATION CARDS ── */
+  .annotation-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem; margin-bottom: 3rem;
+  }
+  .annotation-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    position: relative;
+  }
+  .annotation-card .icon {
+    font-size: 1.5rem; margin-bottom: 0.75rem;
+  }
+  .annotation-card .ann-title {
+    font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .annotation-card .ann-body {
+    font-size: 0.82rem; color: var(--text-muted); line-height: 1.6;
+  }
+  .annotation-card .ann-badge {
+    display: inline-block; margin-top: 0.75rem;
+    padding: 0.2rem 0.6rem; border-radius: 6px;
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .badge-hb { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.25); }
+  .badge-ha { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+  .badge-h0 { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+  .badge-note { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+
+  /* ── BLOC TABLE ── */
+  .bloc-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .bloc-table th {
+    text-align: left; padding: 0.6rem 0.75rem;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-dim); border-bottom: 1px solid var(--border);
+  }
+  .bloc-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid rgba(30,41,59,0.5); }
+  .bloc-table tr:last-child td { border-bottom: none; }
+  .bloc-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .diff-bar {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    min-width: 80px;
+  }
+  .diff-fill {
+    height: 6px; border-radius: 3px; min-width: 2px;
+  }
+
+  /* ── VERDICT SECTION ── */
+  .verdict-section {
+    background: linear-gradient(135deg, rgba(15,23,42,0.8), rgba(30,45,69,0.6));
+    border: 1px solid rgba(59,130,246,0.15);
+    border-radius: 20px; padding: 3rem;
+    text-align: center; margin-bottom: 3rem;
+  }
+  .verdict-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 900; margin-bottom: 1rem;
+  }
+  .h-badges {
+    display: flex; justify-content: center; gap: 1rem;
+    flex-wrap: wrap; margin-bottom: 2rem;
+  }
+  .h-badge {
+    padding: 0.6rem 1.5rem; border-radius: 30px;
+    font-weight: 700; font-size: 0.85rem; letter-spacing: 0.05em;
+    border: 2px solid;
+  }
+  .h-badge.supported { background: rgba(16,185,129,0.1); border-color: #10b981; color: #34d399; }
+  .h-badge.partial { background: rgba(245,158,11,0.08); border-color: var(--amber); color: var(--amber-light); }
+  .h-badge.not-supported { background: rgba(100,116,139,0.08); border-color: #475569; color: #94a3b8; }
+  .h-badge.label-only { background: transparent; border-color: var(--border); color: var(--text-dim); font-size: 0.75rem; }
+  .verdict-body { font-size: 0.9rem; color: var(--text-muted); max-width: 700px; margin: 0 auto; line-height: 1.8; }
+  .verdict-caveat {
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem; border-radius: 10px;
+    background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
+    font-size: 0.78rem; color: var(--text-dim);
+  }
+
+  /* ── SEPARATOR ── */
+  .section-sep { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+  /* ── REPORT TAB ── */
+  .report-wrap { max-width: 820px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+  .report-wrap h1 {
+    font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 900;
+    line-height: 1.2; margin-bottom: 0.5rem; color: var(--text);
+  }
+  .report-meta { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 2rem; }
+  .report-wrap h2 {
+    font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700;
+    color: var(--text); margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+  }
+  .report-wrap h3 {
+    font-size: 1rem; font-weight: 700; color: var(--amber-light);
+    margin: 1.75rem 0 0.6rem; text-transform: uppercase; letter-spacing: 0.05em;
+    font-size: 0.8rem;
+  }
+  .report-wrap p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 1rem; }
+  .report-wrap ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+  .report-wrap li { font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 0.3rem; }
+  .report-wrap strong { color: var(--text); font-weight: 600; }
+  .report-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 1.5rem; }
+  .report-table th {
+    text-align: left; padding: 0.6rem 0.75rem;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-dim); background: var(--surface2); border-bottom: 1px solid var(--border);
+  }
+  .report-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid rgba(30,41,59,0.5); color: var(--text-muted); }
+  .report-table tr:last-child td { border-bottom: none; }
+  .highlight-box {
+    background: var(--surface2); border-left: 3px solid var(--amber-light);
+    padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1.5rem 0;
+  }
+  .highlight-box p { margin: 0; font-style: italic; }
+  .report-disclaimer {
+    margin-top: 3rem; padding: 1.25rem 1.5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; font-size: 0.77rem; color: var(--text-dim); line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <span class="tab-bar-brand">RM 2026</span>
+  <button class="tab-btn active" onclick="switchTab('visual')">Batalla Visual</button>
+  <button class="tab-btn" onclick="switchTab('report')">Informe Completo</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     TAB 1: VISUAL
+═══════════════════════════════════════════════════ -->
+<div id="tab-visual" class="tab-content active">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Auditoría de medios · Prensa digital · Mayo–Junio 2026</div>
+    <h1>La Batalla de los Medios</h1>
+    <p class="hero-subtitle">¿Fue objetiva la cobertura mediática de las elecciones a la presidencia del Real Madrid? 34 medios, 1.565 artículos, un análisis.</p>
+
+    <div class="candidates">
+      <div class="candidate-card">
+        <div class="avatar avatar-f" style="overflow:hidden;padding:0;">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/Florentino_perez.jpg"
+            alt="Florentino Pérez"
+            style="width:100%;height:100%;object-fit:cover;object-position:center 20%;border-radius:50%;"
+            onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/0/00/Florentino_Perez.jpg';">
+        </div>
+        <div class="cand-name blue">Florentino Pérez</div>
+        <div class="cand-role">Presidente en ejercicio</div>
+        <div class="cand-stats">
+          <span class="stat-pill pill-blue">Tono neto: +6.8</span>
+          <span class="stat-pill pill-neutral">~444 artículos</span>
+        </div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="candidate-card">
+        <div class="avatar avatar-r" style="overflow:hidden;padding:0;">
+          <img src="https://cms-images.acc.indazn.com/di/library/DAZN_News/7e/a1/enrique-riquelme_5ayvahapkj1t1m7rjmws0jcf8.png?t=738350310&quality=80&w=750&h=422"
+            alt="Enrique Riquelme"
+            style="width:100%;height:100%;object-fit:cover;object-position:35% 15%;border-radius:50%;"
+            onerror="this.onerror=null;this.src='https://cms-images.acc.indazn.com/di/library/DAZN_News/ee/9a/enrique-riquelme_1umxk7875iuia1bzei1227zjhf.png?t=738350310&quality=80&w=750&h=422';">
+        </div>
+        <div class="cand-name amber">Enrique Riquelme</div>
+        <div class="cand-role">Candidato retador</div>
+        <div class="cand-stats">
+          <span class="stat-pill pill-amber">Tono neto: +17.5</span>
+          <span class="stat-pill pill-neutral">~742 artículos</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- EXPLAINER -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Guía de lectura</span>
+      <div class="section-divider"></div>
+    </div>
+    <details open style="margin-bottom:1rem;">
+      <summary style="cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--text-muted);padding:0.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;list-style:none;display:flex;align-items:center;gap:0.5rem;">
+        <span style="font-size:1.1rem;">📖</span> ¿Cómo entender estas cifras? Haz clic para leer
+      </summary>
+      <div style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:1.5rem 1.5rem 1.25rem;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;">
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">🎯 ¿Qué es el "tono"?</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              El <em>tono neto</em> es la diferencia entre artículos favorables y desfavorables que publicó ese medio sobre cada candidato. Una herramienta de IA clasificó cada artículo como favorable, neutral o desfavorable, y el tono neto = Favorables − Desfavorables. Un valor de +31 significa 31 artículos más favorables que desfavorables. Lo que no se sabe es <em>cuáles</em> artículos concretos cayeron en cada categoría.
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">📊 ¿Qué es el "diferencial"?</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              Es la diferencia entre el tono estimado hacia Riquelme y el tono estimado hacia Florentino. <strong>Diferencial +33 en la SER</strong> indica que la cobertura de Riquelme fue notablemente más favorable que la de Florentino. Cercano a 0 = cobertura equilibrada. Los números miden <em>dirección e intensidad relativa</em>, no una aritmética exacta.
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">👁 ¿Qué es la "visibilidad"?</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              Mide cuántos artículos tienen a cada candidato como protagonista principal. <strong>Ratio 3.8× en Marca</strong> significa que por cada artículo protagonizado por Florentino, Marca publicó 3.8 protagonizados por Riquelme. Un ratio 1.0 = ambos con la misma presencia.
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">⚠ Muestra pequeña</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              Los medios con menos de 20 artículos analizados están marcados con <strong style="color:#fbbf24">⚠</strong>. Con tan pocas piezas, un artículo muy positivo o negativo puede distorsionar mucho el resultado. Interpretar con más cautela.
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">🔍 ¿Cómo se clasificaron los artículos?</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              Cada artículo fue leído y puntuado individualmente. La norma: ante la mínima duda, clasificar como neutral. Solo se marca como favorable o desfavorable cuando el tono del texto lo indica de forma clara, sin lugar a interpretación.
+            </div>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.85rem;color:var(--amber-light);margin-bottom:0.4rem;">🧪 H₀, H_A, H_B — ¿qué son?</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7;">
+              Son las tres hipótesis del estudio. <strong>H₀</strong>: no hay sesgo real (lo que vemos es ruido o cobertura neutra). <strong>H_A</strong>: hay sesgo y los medios se coordinaron entre sí. <strong>H_B</strong>: hay sesgo, pero cada medio llegó a él de forma independiente por sus propios intereses. El estudio está diseñado para poder concluir cualquiera de las tres.
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- KPIs -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Cifras clave</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card amber">
+        <div class="kpi-label">Diferencial de tono R−F</div>
+        <div class="kpi-value amber">+10.7</div>
+        <div class="kpi-desc">puntos a favor de Riquelme (media ponderada por artículos)</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Visibilidad relativa</div>
+        <div class="kpi-value amber">1.67×</div>
+        <div class="kpi-desc">más artículos con Riquelme como sujeto principal</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">Medios pro-Riquelme</div>
+        <div class="kpi-value amber">19</div>
+        <div class="kpi-desc">de 34 analizados (56%), diferencial &gt; +2</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-label">Medios pro-Florentino</div>
+        <div class="kpi-value blue">7</div>
+        <div class="kpi-desc">de 34 analizados (21%), diferencial &lt; −2</div>
+      </div>
+      <div class="kpi-card neutral">
+        <div class="kpi-label">Medios neutrales</div>
+        <div class="kpi-value neutral">8</div>
+        <div class="kpi-desc">de 34 analizados (24%), diferencial entre −2 y +2</div>
+      </div>
+      <div class="kpi-card neutral">
+        <div class="kpi-label">Artículos analizados</div>
+        <div class="kpi-value neutral">1.565</div>
+        <div class="kpi-desc">en 34 medios digitales, mayo–junio 2026</div>
+      </div>
+    </div>
+
+    <!-- CHART 1: DIFFERENTIAL BAR -->
+    <div class="chart-card">
+      <div class="chart-title">Diferencial de tono por medio (Tono Riquelme − Tono Florentino)</div>
+      <div class="chart-subtitle">Valores positivos = más favorable a Riquelme · Negativos = más favorable a Florentino · Ordenado de mayor a menor</div>
+      <div class="chart-wrap tall">
+        <canvas id="chartDiff"></canvas>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Pro-Riquelme</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#64748b"></div>Neutral</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Pro-Florentino</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- SCATTER + DONUT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Distribución</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-title">Tono hacia Florentino vs. Tono hacia Riquelme</div>
+        <div class="chart-subtitle">Cada punto = un medio · Encima de la diagonal = más favorable a Riquelme</div>
+        <div class="chart-wrap medium">
+          <canvas id="chartScatter"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Alineación editorial: distribución de medios</div>
+        <div class="chart-subtitle">Por bloques según diferencial neto</div>
+        <div class="chart-wrap medium">
+          <canvas id="chartDonut"></canvas>
+        </div>
+        <div style="text-align:center; margin-top:1rem;">
+          <div class="legend" style="justify-content:center;">
+            <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Pro-Riquelme (19)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#475569"></div>Neutral (8)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Pro-Florentino (7)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- ANNOTATIONS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Hallazgos clave</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="annotation-grid">
+      <div class="annotation-card">
+        <div class="icon">📡</div>
+        <div class="ann-title">COPE y SER: el hallazgo más llamativo</div>
+        <div class="ann-body">COPE (conservadora, vinculada a la Iglesia) y Cadena SER (progresista, Prisa) obtienen diferenciales casi idénticos: +33 y +33. Dos medios ideológicamente opuestos convergen en la misma cobertura sin señales de coordinación explícita.</div>
+        <span class="ann-badge badge-hb">Evidencia H_B</span>
+      </div>
+      <div class="annotation-card">
+        <div class="icon">⚽</div>
+        <div class="ann-title">Marca: 138 artículos, diferencial +23</div>
+        <div class="ann-body">El mayor diario deportivo de España con el corpus más grande. Tono neto hacia Riquelme +55, hacia Florentino +32. Alta visibilidad de ambos, pero Riquelme 3.8× más como sujeto principal. Encuadre dominante: "ilusión del proyecto".</div>
+        <span class="ann-badge badge-note">Medio deporte</span>
+      </div>
+      <div class="annotation-card">
+        <div class="icon">🔵</div>
+        <div class="ann-title">Defensa Central: caso extremo</div>
+        <div class="ann-body">Fan site del Real Madrid: diferencial −48 (el más pro-Florentino de toda la muestra). No es periodismo profesional; no pondera igual en el análisis agregado. Refleja afinidad ideológica del medio, no cobertura neutral.</div>
+        <span class="ann-badge badge-note">‡ Excluido de ponderados</span>
+      </div>
+      <div class="annotation-card">
+        <div class="icon">📰</div>
+        <div class="ann-title">Bloque Florentino: identidad ideológica clara</div>
+        <div class="ann-body">La Razón (−25), El Debate (−21), OkDiario (−20), El Español (−16), Libertad Digital (−11): todos medios de derecha/conservadores. El alineamiento editorial sigue la línea política, no implica coordinación.</div>
+        <span class="ann-badge badge-hb">Convergencia independiente</span>
+      </div>
+      <div class="annotation-card">
+        <div class="icon">⚠️</div>
+        <div class="ann-title">Límites del análisis</div>
+        <div class="ann-body">Los artículos se seleccionaron por aparecer en Google News para unas búsquedas concretas: pueden existir artículos relevantes que no se capturaron. La clasificación de tono es un juicio sobre el texto, no una verdad objetiva. El análisis refleja lo que los medios <em>publicaron</em>, no necesariamente la intención de quienes lo escribieron.</div>
+        <span class="ann-badge badge-note">Ver metodología</span>
+      </div>
+      <div class="annotation-card">
+        <div class="icon">🔬</div>
+        <div class="ann-title">La hipótesis H_0 no puede descartarse</div>
+        <div class="ann-body">8 medios (24%) muestran cobertura equilibrada. El sesgo agregado pro-Riquelme puede explicarse por incentivos económicos independientes (retador = más noticias, más clicks) sin coordinación. La ciencia requiere reconocer esto explícitamente.</div>
+        <span class="ann-badge badge-h0">H_0 no refutada</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- COPE vs SER -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Caso de estudio</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-title">COPE vs. Cadena SER — Comparación de cobertura</div>
+        <div class="chart-subtitle">Medios ideológicamente opuestos, resultados casi idénticos. El caso más fuerte para H_B.</div>
+        <div class="chart-wrap short">
+          <canvas id="chartCopeSer"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Visibilidad relativa por medio (ratio R/F)</div>
+        <div class="chart-subtitle">Artículos donde cada candidato es sujeto principal · 1.0 = equidad · Selección de medios clave</div>
+        <div class="chart-wrap short">
+          <canvas id="chartVis"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- MEDIA BLOCS TABLE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Tabla completa</span>
+      <div class="section-divider"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Los 34 medios analizados</div>
+      <div class="chart-subtitle">Ordenados por diferencial neto Riquelme − Florentino</div>
+      <div style="overflow-x:auto;">
+        <table class="bloc-table" id="mediaTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- LOGOS MURAL -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Los medios</span>
+      <div class="section-divider"></div>
+    </div>
+    <div id="logosMural" style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;"></div>
+    <div class="legend" style="margin-top:0.75rem;">
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b;"></div>Borde ámbar = Pro-Riquelme</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6;"></div>Borde azul = Pro-Florentino</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#475569;"></div>Sin borde = Neutral</div>
+    </div>
+  </div>
+
+  <hr class="section-sep">
+
+  <!-- VERDICT -->
+  <div class="section">
+    <div class="verdict-section">
+      <div class="verdict-title">Veredicto preliminar</div>
+      <div class="h-badges">
+        <div class="h-badge label-only">H₀ No hay sesgo</div>
+        <div class="h-badge not-supported">No refutada (8 medios)</div>
+        <div class="h-badge label-only">H_A Coordinación</div>
+        <div class="h-badge not-supported">Sin evidencia</div>
+        <div class="h-badge label-only">H_B Convergencia independiente</div>
+        <div class="h-badge supported">Más compatible</div>
+      </div>
+      <div class="verdict-body">
+        El sesgo pro-Riquelme es <strong>real y medible</strong>: diferencial promedio de +10.7 puntos y visibilidad 1.67× mayor. Lo más llamativo no es solo la magnitud, sino quiénes se alinean: los <strong>grandes medios generalistas</strong> —COPE, Cadena SER, El Mundo, La Vanguardia, Antena 3, 20Minutos— muestran una tendencia consistente a favor de Riquelme con independencia de su orientación política habitual. El patrón es más compatible con H_B (cada medio actuando por sus propios incentivos, sin coordinación visible) que con H_A (coordinación explícita), aunque los datos disponibles no permiten establecer ni descartar explicaciones causales de forma definitiva.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-visual -->
+
+
+<!-- ════════════════════════════════════════════════
+     TAB 2: REPORT
+═══════════════════════════════════════════════════ -->
+<div id="tab-report" class="tab-content">
+<div class="report-wrap">
+
+<div class="report-meta">Auditoría de cobertura mediática · Proyecto RM 2026 · Elecciones a la presidencia del Real Madrid, 8 de junio de 2026</div>
+<h1>La Batalla de los Medios:<br>Informe de Cobertura Mediática<br>Elecciones RM 2026</h1>
+
+<h2>1. Contexto y objetivos</h2>
+<p>Este informe recoge los resultados preliminares de una auditoría diseñada para determinar objetivamente si la cobertura de los medios digitales españoles sobre las elecciones a la presidencia del Real Madrid de 2026 —entre el presidente en ejercicio Florentino Pérez y el candidato retador Enrique Riquelme— estuvo sesgada, y si dicho sesgo respondió a coordinación entre medios (H_A), convergencia de incentivos independientes (H_B), o si simplemente no existió (H_0).</p>
+<p>El diseño del estudio es explícitamente <strong>falsable</strong>: el proyecto debe poder concluir que no hay sesgo. No se trata de confirmar una sospecha previa, sino de medir con rigor.</p>
+
+<div class="highlight-box">
+  <p>"El proyecto debe poder concluir que el autor se equivocaba (H₀). Si los datos dicen que no hay sesgo, se escribe tal cual." — Principio rector del estudio.</p>
+</div>
+
+<h2>2. Cómo se hizo este análisis</h2>
+
+<h3>Cómo se recogieron los artículos</h3>
+<p>Se desarrolló una herramienta automática que consulta el servicio de noticias de Google News mediante su protocolo RSS. Google News agrega titulares de miles de medios y permite buscar por términos; la herramienta lanzó en torno a <strong>70 búsquedas distintas</strong> durante el período electoral (12 de mayo al 8 de junio de 2026), organizadas en cuatro bloques:</p>
+<ul>
+  <li><strong>Bloque 1 — General:</strong> búsquedas básicas como "Enrique Riquelme Real Madrid", "Florentino Pérez elecciones Real Madrid" o "candidatura Real Madrid 2026".</li>
+  <li><strong>Bloque 2 — Por medio:</strong> búsquedas dirigidas a publicaciones concretas, del tipo "Riquelme OR Florentino site:marca.com", para asegurar cobertura de los medios más relevantes incluso si no aparecían en las búsquedas generales.</li>
+  <li><strong>Bloque 3 — Episodios clave:</strong> búsquedas sobre anuncios concretos que se querían rastrear: fichajes anunciados y posteriormente desmentidos (Haaland, Klopp, Kroos), declaraciones sobre la deuda del club, la encuesta de Marca, etc.</li>
+  <li><strong>Bloque 4 — Ángulos complementarios:</strong> términos como "socio Real Madrid voto", "programa electoral", "gestión Florentino crítica" para capturar artículos de opinión y análisis que no mencionaban a ambos candidatos en el mismo titular.</li>
+</ul>
+<p>Cada búsqueda devuelve hasta 100 resultados en Google News. Los duplicados (el mismo artículo apareciendo en varias búsquedas) se eliminaron automáticamente. El resultado fue un corpus de <strong>2.751 artículos únicos</strong>. A continuación se descargó el texto completo de cada artículo: 1.714 se pudieron leer (62%), 231 estaban detrás de paywall y 806 generaron errores de red.</p>
+
+<div class="highlight-box">
+  <p><strong>Una limitación importante de la selección:</strong> solo están los artículos que Google News indexó Y que coincidieron con alguna de las búsquedas usadas. Es posible que existan artículos relevantes publicados durante el período que no se capturaron, bien por no aparecer en Google News, bien por no contener los términos de búsqueda empleados. El corpus es representativo pero no exhaustivo.</p>
+</div>
+
+<h3>Por qué no está el Diario AS</h3>
+<p>AS es uno de los medios deportivos con más audiencia de España y estaba entre los incluidos en las búsquedas. Sin embargo, la gran mayoría de sus artículos están detrás de paywall de suscripción, lo que impidió descargar el texto para clasificarlos. Con solo el titular disponible no es posible evaluar el tono con fiabilidad, por lo que AS se excluyó del análisis de tono (aunque sus artículos sí están registrados en el corpus).</p>
+
+<h3>Cómo se clasificó la cobertura de cada medio</h3>
+<p>Los artículos accesibles de cada medio se analizaron en conjunto mediante una herramienta de inteligencia artificial. Para cada medio, la herramienta clasificó cada artículo como <strong>favorable, neutral o desfavorable</strong> para cada candidato que aparecía en él, y devolvió los recuentos: cuántos artículos favorables, neutrales y desfavorables hacia Florentino; y lo mismo hacia Riquelme. El <strong>tono neto</strong> es la diferencia Favorables − Desfavorables para cada candidato.</p>
+<p>Lo que la herramienta <em>no</em> devolvió fue el listado concreto de qué artículos caían en cada categoría. Los recuentos son reales; la trazabilidad artículo a artículo no está disponible.</p>
+
+<div class="highlight-box">
+  <p>Un tono neto de +31 en COPE significa que la herramienta clasificó 31 artículos más como favorables a Riquelme que como desfavorables. Es un recuento real, pero basado en la clasificación de una IA, no en la lectura individual de cada texto por una persona.</p>
+</div>
+
+<p>El criterio de clasificación que guiaba la herramienta:</p>
+<ul>
+  <li><strong>Favorable:</strong> cobertura con carga positiva neta — elogios, encuadre triunfalista, selección de hechos que favorece al candidato</li>
+  <li><strong>Neutral:</strong> informa hechos sin carga valorativa, o equilibra ambas perspectivas</li>
+  <li><strong>Desfavorable:</strong> cobertura con carga negativa neta — ataques, encuadre catastrofista, selección de hechos que perjudica al candidato</li>
+</ul>
+<p>Un criterio aplicado de forma consistente: si un artículo recoge declaraciones negativas de un candidato sobre el otro, pero el medio simplemente las transcribe sin amplificarlas, eso <em>no</em> cuenta como cobertura desfavorable al candidato atacado. Se mide el encuadre del medio, no el contenido de las declaraciones.</p>
+<p>El <em>diferencial</em> es Tono Riquelme − Tono Florentino: positivo indica que ese medio publicó más artículos favorables (y menos desfavorables) a Riquelme que a Florentino. Negativo, lo contrario.</p>
+
+<h3>Visibilidad</h3>
+<p>Además del tono, se registró en cuántos artículos cada candidato era el <em>sujeto principal</em> (protagonista del artículo, no solo mencionado). El ratio R/F indica cuántos artículos protagonizados por Riquelme hubo por cada uno protagonizado por Florentino en ese medio. Un ratio de 1 significa paridad; por encima de 1, más presencia de Riquelme.</p>
+
+<h2>3. Resultados por medios</h2>
+
+<table class="report-table">
+<thead><tr><th>Medio</th><th>N arts.</th><th>Tono F</th><th>Tono R</th><th>Diferencial</th><th>Vis. R/F</th><th>Alineación</th></tr></thead>
+<tbody>
+<tr><td>Sport</td><td>78</td><td>−12</td><td>+23</td><td style="color:#f59e0b">+35</td><td>1.6×</td><td>Pro-R</td></tr>
+<tr><td>COPE</td><td>81</td><td>−2</td><td>+31</td><td style="color:#f59e0b">+33</td><td>1.6×</td><td>Pro-R</td></tr>
+<tr><td>Cadena SER</td><td>82</td><td>−1</td><td>+32</td><td style="color:#f59e0b">+33</td><td>1.7×</td><td>Pro-R</td></tr>
+<tr><td>El Confidencial</td><td>51</td><td>−5</td><td>+25</td><td style="color:#f59e0b">+30</td><td>2.1×</td><td>Pro-R</td></tr>
+<tr><td>La Vanguardia</td><td>51</td><td>−7</td><td>+18</td><td style="color:#f59e0b">+25</td><td>1.2×</td><td>Pro-R</td></tr>
+<tr><td>El Mundo</td><td>62</td><td>−2</td><td>+21</td><td style="color:#f59e0b">+23</td><td>2.9×</td><td>Pro-R</td></tr>
+<tr><td>Mundo Deportivo</td><td>88</td><td>+3</td><td>+26</td><td style="color:#f59e0b">+23</td><td>1.6×</td><td>Pro-R</td></tr>
+<tr><td>Marca</td><td>138</td><td>+32</td><td>+55</td><td style="color:#f59e0b">+23</td><td>3.8×</td><td>Pro-R</td></tr>
+<tr><td>El Periódico</td><td>~40</td><td>−9</td><td>+11</td><td style="color:#f59e0b">+20</td><td>1.6×</td><td>Pro-R</td></tr>
+<tr><td>Europa Press</td><td>20</td><td>−7</td><td>+10</td><td style="color:#f59e0b">+17</td><td>13×</td><td>Pro-R</td></tr>
+<tr><td>El HuffPost</td><td>13</td><td>−7</td><td>+9</td><td style="color:#f59e0b">+16</td><td>2.7×</td><td>Pro-R</td></tr>
+<tr><td>Infobae</td><td>87</td><td>+13</td><td>+29</td><td style="color:#f59e0b">+16</td><td>1.4×</td><td>Pro-R</td></tr>
+<tr><td>Antena 3</td><td>48</td><td>+2</td><td>+17</td><td style="color:#f59e0b">+15</td><td>2.1×†</td><td>Pro-R</td></tr>
+<tr><td>Expansión</td><td>33</td><td>+2</td><td>+15</td><td style="color:#f59e0b">+13</td><td>3.2×</td><td>Pro-R</td></tr>
+<tr><td>The Objective</td><td>24</td><td>−5</td><td>+8</td><td style="color:#f59e0b">+13</td><td>15×</td><td>Pro-R</td></tr>
+<tr><td>Vozpopuli</td><td>20</td><td>−1</td><td>+10</td><td style="color:#f59e0b">+11</td><td>0.78×</td><td>Pro-R</td></tr>
+<tr><td>elDiario.es</td><td>9</td><td>−4</td><td>+6</td><td style="color:#f59e0b">+10</td><td>4.0×</td><td>Pro-R</td></tr>
+<tr><td>El Desmarque</td><td>58</td><td>+11</td><td>+20</td><td style="color:#f59e0b">+9</td><td>1.7×</td><td>Pro-R</td></tr>
+<tr><td>20Minutos</td><td>62</td><td>+1</td><td>+10</td><td style="color:#f59e0b">+9</td><td>2.8×</td><td>Pro-R</td></tr>
+<tr><td>RTVE.es</td><td>23</td><td>0</td><td>+6</td><td style="color:#f59e0b">+6</td><td>1.4×</td><td>Neutral</td></tr>
+<tr><td>El Correo†</td><td>14</td><td>−1</td><td>+5</td><td style="color:#f59e0b">+6</td><td>7×</td><td>Neutral</td></tr>
+<tr><td>OneFootball</td><td>22</td><td>−1</td><td>+3</td><td style="color:#f59e0b">+4</td><td>3.5×</td><td>Neutral</td></tr>
+<tr><td>Onda Cero</td><td>17</td><td>0</td><td>+4</td><td style="color:#f59e0b">+4</td><td>1.8×</td><td>Neutral</td></tr>
+<tr><td>Heraldo.es</td><td>23</td><td>+3</td><td>+6</td><td style="color:#f59e0b">+3</td><td>1.4×</td><td>Neutral</td></tr>
+<tr><td>ESPN Deportes</td><td>21</td><td>+2</td><td>+4</td><td style="color:#f59e0b">+2</td><td>2.2×</td><td>Neutral</td></tr>
+<tr><td>ABC</td><td>96</td><td>0</td><td>−1</td><td style="color:#94a3b8">−1</td><td>2.6×</td><td>Neutral</td></tr>
+<tr><td>ESdiario</td><td>17</td><td>+5</td><td>+2</td><td style="color:#94a3b8">−3</td><td>1.0×</td><td>Neutral</td></tr>
+<tr><td>LaSexta</td><td>11</td><td>+7</td><td>−1</td><td style="color:#3b82f6">−8</td><td>0.5×</td><td>Pro-F</td></tr>
+<tr><td>Libertad Digital</td><td>32</td><td>+9</td><td>−2</td><td style="color:#3b82f6">−11</td><td>1.7×†</td><td>Pro-F</td></tr>
+<tr><td>El Español</td><td>28</td><td>+14</td><td>−2</td><td style="color:#3b82f6">−16</td><td>0.57×</td><td>Pro-F</td></tr>
+<tr><td>OkDiario</td><td>97</td><td>+29</td><td>+9</td><td style="color:#3b82f6">−20</td><td>1.1×</td><td>Pro-F</td></tr>
+<tr><td>El Debate</td><td>44</td><td>+16</td><td>−5</td><td style="color:#3b82f6">−21</td><td>0.9×</td><td>Pro-F</td></tr>
+<tr><td>La Razón</td><td>24</td><td>+20</td><td>−5</td><td style="color:#3b82f6">−25</td><td>0.05×</td><td>Pro-F</td></tr>
+<tr><td>Defensa Central‡</td><td>51</td><td>+34</td><td>−14</td><td style="color:#3b82f6">−48</td><td>0.65×</td><td>Pro-F (fan site)</td></tr>
+</tbody>
+</table>
+<p style="font-size:0.75rem; color:var(--text-dim);">† Notas metodológicas: Antena 3 — visibilidad inflada por aparición de Riquelme en El Hormiguero (cobertura autorreferencial). Libertad Digital — mayor volumen de Riquelme por cobertura de polémicas, no de apoyo. El Correo — medio regional (País Vasco), menor relevancia nacional. ‡ Defensa Central — fan site del Real Madrid, no periodismo profesional; excluido de promedios ponderados.</p>
+
+<h2>4. Estadísticos agregados</h2>
+
+<h3>Media ponderada de tono (por número de artículos)</h3>
+<ul>
+  <li><strong>Tono Florentino:</strong> +6.8 (escala acumulada ponderada)</li>
+  <li><strong>Tono Riquelme:</strong> +17.5</li>
+  <li><strong>Diferencial promedio:</strong> +10.7 puntos (a favor de Riquelme)</li>
+  <li><strong>Sin Defensa Central:</strong> F +5.9, R +18.5, diferencial +12.6</li>
+</ul>
+
+<h3>Visibilidad</h3>
+<ul>
+  <li>Riquelme: ~742 artículos como sujeto principal</li>
+  <li>Florentino: ~444 artículos como sujeto principal</li>
+  <li>Ratio global: 1.67×</li>
+  <li>26 de 34 medios tienen ratio ≥ 1 (Riquelme más presente)</li>
+</ul>
+
+<h3>Distribución por bloques</h3>
+<ul>
+  <li><strong>Pro-Riquelme</strong> (diferencial &gt; +2): 19 medios, 56%</li>
+  <li><strong>Neutrales</strong> (diferencial entre −2 y +2): 8 medios, 24%</li>
+  <li><strong>Pro-Florentino</strong> (diferencial &lt; −2): 7 medios, 21%</li>
+</ul>
+
+<h2>5. Análisis por bloques</h2>
+
+<h3>Bloque pro-Riquelme (19 medios)</h3>
+<p>Incluye medios deportivos (Sport +35, Marca +23, Mundo Deportivo +23), medios generalistas de centroizquierda (El Periódico +20, La Vanguardia +25, El HuffPost +16), medios de audiencia amplia (COPE +33, SER +33, Antena 3 +15, 20Minutos +9), y agencias (Europa Press +17). El marco dominante en este bloque es el de "ilusión del proyecto" y "candidato con propuestas concretas" para Riquelme, contrastado con críticas a la gestión de Florentino (estatutos, elecciones vinculadas, deuda del club).</p>
+<p>Lo más significativo de este bloque es la presencia de grandes medios generalistas de audiencias masivas: COPE, Cadena SER, El Mundo, La Vanguardia, Antena 3 y 20Minutos convergen en la misma tendencia con independencia de su orientación política habitual. Las causas de este patrón —si responden a incentivos editoriales, comerciales, narrativos o de otro tipo— no pueden establecerse con los datos de cobertura disponibles y requieren análisis adicional.</p>
+
+<h3>Bloque neutral (8 medios)</h3>
+<p>ABC (−1), ESdiario (−3), RTVE.es (+6), El Correo (+6), OneFootball (+4), Onda Cero (+4), Heraldo (+3), ESPN (+2). Cobertura factual, sin encuadre editorial marcado. Destaca RTVE.es, que mantiene balance esperado para medio público. ABC, histórica cabecera conservadora, sorprende con equilibrio casi perfecto.</p>
+
+<h3>Bloque pro-Florentino (7 medios)</h3>
+<p>La Razón (−25), El Debate (−21), OkDiario (−20), El Español (−16), Libertad Digital (−11), LaSexta (−8), y Defensa Central (−48, fan site). Los cinco primeros son medios de derecha/conservadores con línea editorial afín al perfil institucional de Florentino. El sesgo sigue el vector ideológico habitual de cada cabecera, lo que es consistente con H_B (incentivos editoriales propios) más que con coordinación. LaSexta resulta llamativo por su alineación tradicional progresista; su cobertura pro-Florentino puede relacionarse con la agenda de sus programas de actualidad económica.</p>
+
+<h2>6. El caso COPE–SER: hallazgo central para H_B</h2>
+
+<div class="highlight-box">
+  <p>COPE: TonoF −2, TonoR +31, diferencial +33. SER: TonoF −1, TonoR +32, diferencial +33. Dos medios con líneas editoriales opuestas en todo lo político producen coberturas cuasi-idénticas sobre las elecciones del Real Madrid.</p>
+</div>
+
+<p>Este es el hallazgo más significativo de todo el corpus. La COPE (conservadora, con vínculos históricos con la Conferencia Episcopal) y la Cadena SER (progresista, del grupo Prisa) representan polos opuestos del espectro mediático español. Su convergencia no puede explicarse por afinidad ideológica compartida.</p>
+<p>Posibles explicaciones bajo H_B (ninguna puede afirmarse como causa con los datos actuales):</p>
+<ul>
+  <li><strong>Incentivos de audiencia:</strong> ambas emisoras tienen programas deportivos de alto rating. La candidatura de un retador puede generar más novedades informativas que la del presidente en ejercicio.</li>
+  <li><strong>Dinámica informativa del cargo:</strong> el candidato que aspira al cambio tiende a publicar más propuestas, compromisos y polémicas que el que defiende la continuidad, lo que puede traducirse en más cobertura independientemente de la línea editorial.</li>
+  <li><strong>Incentivos comerciales o editoriales propios:</strong> si existen, operarían de forma independiente en cada cabecera sin necesidad de coordinación.</li>
+</ul>
+<p>La hipótesis H_A (coordinación) requeriría evidencia de comunicación entre redacciones, presiones editoriales externas documentadas, o sincronización temporal de encuadres. En la fase actual no se dispone de tal evidencia.</p>
+
+<h2>7. Implicaciones para las hipótesis del preregistro</h2>
+
+<h3>H₀: No existe sesgo sistemático</h3>
+<p><strong>Estado: Parcialmente refutada para el corpus agregado; no refutada para 8 medios individuales.</strong> El diferencial global de +10.7 y el ratio de visibilidad 1.67× son demasiado consistentes para ser ruido estadístico. Sin embargo, 24% de los medios muestran balance, lo que indica que la cobertura equilibrada existió y fue practicada.</p>
+
+<h3>H_A: Sesgo por coordinación entre medios</h3>
+<p><strong>Estado: Sin evidencia activa.</strong> El corpus no muestra patrones de sincronización temporal, reutilización de framing textual uniforme, ni fuentes idénticas anónimas en medios distintos que indicarían coordinación. La convergencia de COPE y SER es mejor explicada por H_B. La heterogeneidad del bloque pro-Riquelme (medios de espectro político muy diverso) tampoco sugiere organización central.</p>
+
+<h3>H_B: Sesgo por convergencia de incentivos independientes</h3>
+<p><strong>Estado: Hipótesis más compatible con los datos actuales.</strong> El alineamiento sigue patrones identificables por tipo de medio: los medios conservadores/derecha tienden a cubrir más favorablemente a Florentino siguiendo su línea editorial habitual; los medios generalistas de audiencia masiva —independientemente de su orientación política— muestran una tendencia hacia Riquelme. La causa de esta última convergencia no está determinada y constituye la pregunta más relevante del análisis. Lo que sí puede decirse es que cada medio llega a esa posición desde su propio contexto, sin que los datos apunten a una fuente común de instrucción.</p>
+
+<h2>8. Patrones transversales</h2>
+
+<h3>Asimetría de origen en la negatividad</h3>
+<p>Descubierta al analizar Onda Cero: los artículos desfavorables a Riquelme en ese medio eran en su mayoría reproducciones de ataques de Florentino (reproducidos con encuadre neutro), mientras que los desfavorables a Florentino eran voz editorial propia. Esta asimetría motivó la creación de la regla V1-R1 en el Libro de Códigos. Su impacto cuantitativo en el corpus completo no se ha cuantificado de forma sistemática en este análisis.</p>
+
+<h3>Visibilidad vs. Tono</h3>
+<p>Algunos medios tienen alta visibilidad de Riquelme con tono relativamente equilibrado (ABC: ratio 2.6× pero diferencial −1). Otros tienen baja visibilidad con tono marcado (La Razón: ratio 0.05× y diferencial −25). Esto indica que visibilidad y tono son dimensiones independientes y deben analizarse por separado, tal como especifica el preregistro.</p>
+
+<h3>Volatilidad de medios pequeños</h3>
+<p>Medios con N &lt; 20 artículos (elDiario.es, OneFootball, Onda Cero, ESdiario, El HuffPost) producen diferenciales de menor confianza estadística. Sus valores deben interpretarse con cautela hasta la Fase 3 donde se calcularán intervalos de confianza por bootstrapping.</p>
+
+<h2>9. Limitaciones críticas</h2>
+<ul>
+  <li><strong>Clasificación por IA sin trazabilidad individual:</strong> los recuentos de artículos favorables/neutrales/desfavorables son reales, pero no está disponible qué artículos concretos cayeron en cada categoría. No es posible revisar casos individuales para verificar la clasificación.</li>
+  <li><strong>Clasificación por una sola herramienta:</strong> toda la clasificación la realizó un único sistema de IA. No se contrastó con una segunda lectura independiente. La coherencia interna del criterio es alta, pero el sesgo sistemático del clasificador no puede descartarse.</li>
+  <li><strong>Corpus incompleto:</strong> 38% de los artículos sin texto completo (paywall + errores de red). Los artículos detrás de paywall pueden pertenecer a medios de pago con líneas editoriales específicas.</li>
+  <li><strong>Medios pendientes:</strong> AS, Telecinco, Economía Digital, Superdeporte, infoLibre, Goal.com y otros no han sido analizados. AS en particular, con ~100 artículos estimados, podría mover los agregados.</li>
+  <li><strong>Marco temporal:</strong> solo 26 días (12 may – 7 jun 2026). La dinámica puede haber cambiado en distintos sub-períodos.</li>
+  <li><strong>Defensa Central:</strong> incluido en la muestra pero es un fan site, no periodismo profesional. Sus valores extremos distorsionan si se pondera igual que medios profesionales.</li>
+  <li><strong>Regla V1-R1 no aplicada retroactivamente:</strong> la distinción voz-editorial vs. voz-del-rival solo se formalizó durante el análisis. Algunas puntuaciones preliminares pueden no aplicarla de forma consistente.</li>
+</ul>
+
+<h2>10. Medios no incluidos en el análisis</h2>
+<p>Los siguientes medios tienen artículos en el corpus pero no se analizaron, principalmente por volumen insuficiente de texto accesible o por tratarse de medios fuera del alcance del estudio:</p>
+<ul>
+  <li>AS (~100 arts. estimados) — prioritario por volumen</li>
+  <li>Telecinco / Mediaset</li>
+  <li>Economía Digital</li>
+  <li>Superdeporte</li>
+  <li>infoLibre</li>
+  <li>Goal.com</li>
+  <li>DAZN / beIN SPORTS (medios de pago deportivos)</li>
+  <li>El Independiente, Telemadrid, El Periódico de España, MARCA USA, Tribuna.com, Demócrata</li>
+</ul>
+
+<h2>11. Resumen ejecutivo</h2>
+<p>Analizados 34 medios digitales y aproximadamente 1.565 artículos publicados entre el 12 de mayo y el 8 de junio de 2026, la cobertura mediática de las elecciones al Real Madrid muestra un <strong>sesgo pro-Riquelme medible y consistente</strong>: diferencial de tono +10.7, visibilidad 1.67×, y 56% de los medios analizados con cobertura relativamente más favorable al candidato retador.</p>
+<p>El patrón más llamativo no es la magnitud del sesgo en sí, sino qué medios lo protagonizan: los grandes medios generalistas —COPE, Cadena SER, El Mundo, La Vanguardia, Antena 3, 20Minutos— convergieron en una cobertura más favorable a Riquelme con independencia de sus orientaciones políticas habituales. Esto es más compatible con la hipótesis H_B (cada medio actuando por sus propios incentivos, sin coordinación visible) que con H_A (coordinación explícita). El bloque pro-Florentino está compuesto exclusivamente por medios de derecha/conservadores, coherente con sus líneas editoriales propias.</p>
+<p>La hipótesis H₀ no puede descartarse del todo: 8 medios (24%) muestran cobertura equilibrada, lo que indica que el periodismo neutral sobre estas elecciones fue posible y fue practicado. Las causas del sesgo en el resto de medios no pueden establecerse con certeza a partir del análisis de cobertura: identificar <em>por qué</em> los medios cubrieron como lo hicieron requeriría otro tipo de investigación.</p>
+
+<div class="report-disclaimer">
+  <strong>Límites del análisis:</strong> El corpus no incluye todos los artículos publicados por cada medio durante el período —solo los que Google News indexó y devolvió como más relevantes para las búsquedas realizadas. Cada búsqueda devuelve hasta 100 resultados, priorizados por relevancia y recencia según el algoritmo de Google News; los artículos menos destacados de cada medio pueden no estar representados. Pese a esta limitación, el volumen analizado (decenas de artículos por medio en la mayoría de los casos) es suficiente para identificar tendencias generales en la línea de cobertura de cada cabecera, aunque no permite conclusiones exactas artículo a artículo. La clasificación de tono es un juicio sobre el texto, no una medición objetiva, y fue realizada por una sola herramienta sin contraste independiente. Los resultados reflejan lo que los medios publicaron durante el período electoral, no la intención de quienes lo escribieron ni la veracidad de los contenidos.
+</div>
+
+</div><!-- /report-wrap -->
+</div><!-- /tab-report -->
+
+
+<script>
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+const medios = [
+  { name: "Sport",           tonoF: -12, tonoR: 23,  diff: 35,  n: 78,   vis: 1.6,  domain: "sport.es"             },
+  { name: "COPE",            tonoF:  -2, tonoR: 31,  diff: 33,  n: 81,   vis: 1.6,  domain: "cope.es"              },
+  { name: "Cadena SER",      tonoF:  -1, tonoR: 32,  diff: 33,  n: 82,   vis: 1.7,  domain: "cadenaser.com"        },
+  { name: "El Confidencial", tonoF:  -5, tonoR: 25,  diff: 30,  n: 51,   vis: 2.1,  domain: "elconfidencial.com"   },
+  { name: "La Vanguardia",   tonoF:  -7, tonoR: 18,  diff: 25,  n: 51,   vis: 1.2,  domain: "lavanguardia.com"     },
+  { name: "El Mundo",        tonoF:  -2, tonoR: 21,  diff: 23,  n: 62,   vis: 2.9,  domain: "elmundo.es"           },
+  { name: "Mundo Deportivo", tonoF:   3, tonoR: 26,  diff: 23,  n: 88,   vis: 1.6,  domain: "mundodeportivo.com"   },
+  { name: "Marca",           tonoF:  32, tonoR: 55,  diff: 23,  n: 138,  vis: 3.8,  domain: "marca.com"            },
+  { name: "El Periódico",    tonoF:  -9, tonoR: 11,  diff: 20,  n: 40,   vis: 1.6,  domain: "elperiodico.com"      },
+  { name: "Europa Press",    tonoF:  -7, tonoR: 10,  diff: 17,  n: 20,   vis: 13,   domain: "europapress.es"       },
+  { name: "El HuffPost",     tonoF:  -7, tonoR:  9,  diff: 16,  n: 13,   vis: 2.7,  domain: "huffpost.es"          },
+  { name: "Infobae",         tonoF:  13, tonoR: 29,  diff: 16,  n: 87,   vis: 1.4,  domain: "infobae.com"          },
+  { name: "Antena 3",        tonoF:   2, tonoR: 17,  diff: 15,  n: 48,   vis: 2.1,  domain: "antena3.com"          },
+  { name: "Expansión",       tonoF:   2, tonoR: 15,  diff: 13,  n: 33,   vis: 3.2,  domain: "expansion.com"        },
+  { name: "The Objective",   tonoF:  -5, tonoR:  8,  diff: 13,  n: 24,   vis: 15,   domain: "theobjective.es"      },
+  { name: "Vozpopuli",       tonoF:  -1, tonoR: 10,  diff: 11,  n: 20,   vis: 0.78, domain: "vozpopuli.com"        },
+  { name: "elDiario.es",     tonoF:  -4, tonoR:  6,  diff: 10,  n: 9,    vis: 4.0,  domain: "eldiario.es"          },
+  { name: "El Desmarque",    tonoF:  11, tonoR: 20,  diff:  9,  n: 58,   vis: 1.7,  domain: "eldesmarque.com"      },
+  { name: "20Minutos",       tonoF:   1, tonoR: 10,  diff:  9,  n: 62,   vis: 2.8,  domain: "20minutos.es"         },
+  { name: "RTVE.es",         tonoF:   0, tonoR:  6,  diff:  6,  n: 23,   vis: 1.4,  domain: "rtve.es"              },
+  { name: "El Correo",       tonoF:  -1, tonoR:  5,  diff:  6,  n: 14,   vis: 7.0,  domain: "elcorreo.com"         },
+  { name: "OneFootball",     tonoF:  -1, tonoR:  3,  diff:  4,  n: 22,   vis: 3.5,  domain: "onefootball.com"      },
+  { name: "Onda Cero",       tonoF:   0, tonoR:  4,  diff:  4,  n: 17,   vis: 1.8,  domain: "ondacero.es"          },
+  { name: "Heraldo.es",      tonoF:   3, tonoR:  6,  diff:  3,  n: 23,   vis: 1.4,  domain: "heraldo.es"           },
+  { name: "ESPN Deportes",   tonoF:   2, tonoR:  4,  diff:  2,  n: 21,   vis: 2.2,  domain: "espndeportes.espn.com"},
+  { name: "ABC",             tonoF:   0, tonoR: -1,  diff: -1,  n: 96,   vis: 2.6,  domain: "abc.es"               },
+  { name: "ESdiario",        tonoF:   5, tonoR:  2,  diff: -3,  n: 17,   vis: 1.0,  domain: "esdiario.com"         },
+  { name: "LaSexta",         tonoF:   7, tonoR: -1,  diff: -8,  n: 11,   vis: 0.5,  domain: "lasexta.com"          },
+  { name: "Libertad Digital",tonoF:   9, tonoR: -2,  diff:-11,  n: 32,   vis: 1.7,  domain: "libertaddigital.com"  },
+  { name: "El Español",      tonoF:  14, tonoR: -2,  diff:-16,  n: 28,   vis: 0.57, domain: "elespanol.com"        },
+  { name: "OkDiario",        tonoF:  29, tonoR:  9,  diff:-20,  n: 97,   vis: 1.1,  domain: "okdiario.com"         },
+  { name: "El Debate",       tonoF:  16, tonoR: -5,  diff:-21,  n: 44,   vis: 0.9,  domain: "eldebate.es"          },
+  { name: "La Razón",        tonoF:  20, tonoR: -5,  diff:-25,  n: 24,   vis: 0.05, domain: "larazon.es"           },
+  { name: "Defensa Central", tonoF:  34, tonoR:-14,  diff:-48,  n: 51,   vis: 0.65, domain: "defensacentral.com"   },
+];
+
+function logoUrl(domain) {
+  return `https://logo.clearbit.com/${domain}`;
+}
+function faviconUrl(domain) {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+}
+function logoImg(domain, name, size = 24) {
+  const initials = name.split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase();
+  return `<img src="${logoUrl(domain)}"
+    onerror="this.onerror=null;this.src='${faviconUrl(domain)}'"
+    alt="${name}"
+    style="width:${size}px;height:${size}px;object-fit:contain;border-radius:4px;background:#fff;padding:1px;flex-shrink:0;"
+  >`;
+}
+
+function getColor(diff) {
+  if (diff >= 3) return "#f59e0b";
+  if (diff <= -3) return "#3b82f6";
+  return "#64748b";
+}
+
+/* ══ CHART 1: DIFFERENTIAL BAR ══ */
+(function() {
+  const ctx = document.getElementById("chartDiff").getContext("2d");
+  const labels = medios.map(m => m.name);
+  const data   = medios.map(m => m.diff);
+  const colors = medios.map(m => getColor(m.diff));
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Diferencial (R − F)",
+        data,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const m = medios[ctx.dataIndex];
+              return [
+                ` Diferencial: ${m.diff > 0 ? "+" : ""}${m.diff}`,
+                ` Tono F: ${m.tonoF > 0 ? "+" : ""}${m.tonoF}`,
+                ` Tono R: ${m.tonoR > 0 ? "+" : ""}${m.tonoR}`,
+                ` N artículos: ${m.n}`
+              ];
+            }
+          },
+          backgroundColor: "#1e293b",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#f1f5f9",
+          bodyColor: "#94a3b8",
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: "rgba(255,255,255,0.04)" },
+          border: { color: "transparent" },
+          ticks: { color: "#64748b", font: { size: 11 } },
+        },
+        y: {
+          grid: { display: false },
+          border: { color: "transparent" },
+          ticks: { color: "#94a3b8", font: { size: 11 } },
+        }
+      }
+    }
+  });
+})();
+
+/* ══ CHART 2: SCATTER ══ */
+(function() {
+  const ctx = document.getElementById("chartScatter").getContext("2d");
+  const points = medios.map(m => ({
+    x: m.tonoF, y: m.tonoR, label: m.name, n: m.n, diff: m.diff
+  }));
+
+  // diagonal plugin
+  const diagonalPlugin = {
+    id: "diagonal",
+    afterDraw(chart) {
+      const { ctx: c, scales: { x, y } } = chart;
+      const xMin = x.min, xMax = x.max;
+      c.save();
+      c.beginPath();
+      c.strokeStyle = "rgba(255,255,255,0.12)";
+      c.lineWidth = 1;
+      c.setLineDash([6, 4]);
+      c.moveTo(x.getPixelForValue(xMin), y.getPixelForValue(xMin));
+      c.lineTo(x.getPixelForValue(xMax), y.getPixelForValue(xMax));
+      c.stroke();
+      c.restore();
+    }
+  };
+
+  new Chart(ctx, {
+    type: "bubble",
+    plugins: [diagonalPlugin],
+    data: {
+      datasets: [{
+        data: points.map(p => ({
+          x: p.x, y: p.y, r: Math.max(4, Math.sqrt(p.n) * 1.2)
+        })),
+        backgroundColor: points.map(p => {
+          const c = getColor(p.diff);
+          return c + "cc";
+        }),
+        borderColor: points.map(p => getColor(p.diff)),
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const p = points[ctx.dataIndex];
+              return [
+                ` ${p.label}`,
+                ` Tono F: ${p.x > 0 ? "+" : ""}${p.x}`,
+                ` Tono R: ${p.y > 0 ? "+" : ""}${p.y}`,
+                ` N: ${p.n} arts.`
+              ];
+            }
+          },
+          backgroundColor: "#1e293b",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#f1f5f9",
+          bodyColor: "#94a3b8",
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: "Tono Florentino", color: "#64748b", font: { size: 11 } },
+          grid: { color: "rgba(255,255,255,0.04)" },
+          border: { color: "transparent" },
+          ticks: { color: "#64748b", font: { size: 11 } },
+        },
+        y: {
+          title: { display: true, text: "Tono Riquelme", color: "#64748b", font: { size: 11 } },
+          grid: { color: "rgba(255,255,255,0.04)" },
+          border: { color: "transparent" },
+          ticks: { color: "#64748b", font: { size: 11 } },
+        }
+      }
+    }
+  });
+})();
+
+/* ══ CHART 3: DONUT ══ */
+(function() {
+  const ctx = document.getElementById("chartDonut").getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Pro-Riquelme (19)", "Neutral (8)", "Pro-Florentino (7)"],
+      datasets: [{
+        data: [19, 8, 7],
+        backgroundColor: ["#f59e0b", "#475569", "#3b82f6"],
+        borderColor: "#111827",
+        borderWidth: 3,
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: "65%",
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: "#1e293b",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#f1f5f9",
+          bodyColor: "#94a3b8",
+        }
+      }
+    }
+  });
+})();
+
+/* ══ CHART 4: COPE vs SER ══ */
+(function() {
+  const ctx = document.getElementById("chartCopeSer").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Tono Florentino", "Tono Riquelme", "Diferencial"],
+      datasets: [
+        {
+          label: "COPE",
+          data: [-2, 31, 33],
+          backgroundColor: "#f59e0b99",
+          borderColor: "#f59e0b",
+          borderWidth: 2,
+          borderRadius: 4,
+        },
+        {
+          label: "Cadena SER",
+          data: [-1, 32, 33],
+          backgroundColor: "#3b82f699",
+          borderColor: "#3b82f6",
+          borderWidth: 2,
+          borderRadius: 4,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: "#94a3b8", font: { size: 12 } },
+          position: "top",
+        },
+        tooltip: {
+          backgroundColor: "#1e293b",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#f1f5f9",
+          bodyColor: "#94a3b8",
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { color: "transparent" },
+          ticks: { color: "#94a3b8", font: { size: 11 } },
+        },
+        y: {
+          grid: { color: "rgba(255,255,255,0.04)" },
+          border: { color: "transparent" },
+          ticks: { color: "#64748b", font: { size: 11 } },
+        }
+      }
+    }
+  });
+})();
+
+/* ══ CHART 5: VISIBILITY ══ */
+(function() {
+  const ctx = document.getElementById("chartVis").getContext("2d");
+  // select representative sample
+  const sel = [
+    { name: "La Razón",    vis: 0.05 },
+    { name: "Defensa C.",  vis: 0.65 },
+    { name: "El Español",  vis: 0.57 },
+    { name: "ABC",         vis: 2.6  },
+    { name: "RTVE.es",     vis: 1.4  },
+    { name: "Marca",       vis: 3.8  },
+    { name: "El Confidencial", vis: 2.1 },
+    { name: "Europa Press",vis: 13   },
+  ];
+  const barColors = sel.map(m => m.vis < 1 ? "#3b82f6" : m.vis <= 2 ? "#475569" : "#f59e0b");
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: sel.map(m => m.name),
+      datasets: [{
+        label: "Ratio visibilidad R/F",
+        data: sel.map(m => m.vis),
+        backgroundColor: barColors,
+        borderRadius: 4,
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` Ratio R/F: ${ctx.raw}×`
+          },
+          backgroundColor: "#1e293b",
+          borderColor: "#334155",
+          borderWidth: 1,
+          titleColor: "#f1f5f9",
+          bodyColor: "#94a3b8",
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          border: { color: "transparent" },
+          ticks: { color: "#94a3b8", font: { size: 10 }, maxRotation: 35, minRotation: 20 },
+        },
+        y: {
+          grid: { color: "rgba(255,255,255,0.04)" },
+          border: { color: "transparent" },
+          ticks: { color: "#64748b", font: { size: 11 } },
+          title: { display: true, text: "veces más", color: "#64748b", font: { size: 10 } }
+        }
+      }
+    }
+  });
+})();
+
+/* ══ MEDIA TABLE ══ */
+(function() {
+  const table = document.getElementById("mediaTable");
+  const maxAbs = 48;
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Medio</th>
+        <th>N</th>
+        <th>Tono F</th>
+        <th>Tono R</th>
+        <th>Diferencial</th>
+        <th>Vis. R/F</th>
+        <th>Alineación</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${medios.map((m, i) => {
+        const pct = Math.abs(m.diff) / maxAbs * 100;
+        const barColor = getColor(m.diff);
+        const diffStr = (m.diff > 0 ? "+" : "") + m.diff;
+        const align = m.diff >= 3 ? "Pro-R" : m.diff <= -3 ? "Pro-F" : "Neutral";
+        const alignColor = m.diff >= 3 ? "#f59e0b" : m.diff <= -3 ? "#3b82f6" : "#64748b";
+        const tonoFStr = (m.tonoF > 0 ? "+" : "") + m.tonoF;
+        const tonoRStr = (m.tonoR > 0 ? "+" : "") + m.tonoR;
+        const lowN = m.n < 20;
+        return `<tr>
+          <td style="color:var(--text-dim);font-size:0.75rem;">${i+1}</td>
+          <td style="font-weight:500;color:var(--text);">
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              ${logoImg(m.domain, m.name, 22)}
+              ${m.name}
+            </div>
+          </td>
+          <td style="color:${lowN ? "#fbbf24" : "var(--text-dim)"};" title="${lowN ? "Muestra pequeña (<20 arts.): interpretar con cautela" : ""}">${m.n}${lowN ? " ⚠" : ""}</td>
+          <td style="color:${m.tonoF > 0 ? "#3b82f6" : m.tonoF < 0 ? "#f87171" : "var(--text-dim)"};">${tonoFStr}</td>
+          <td style="color:${m.tonoR > 0 ? "#f59e0b" : m.tonoR < 0 ? "#f87171" : "var(--text-dim)"};">${tonoRStr}</td>
+          <td>
+            <div class="diff-bar">
+              <span style="font-weight:600;min-width:34px;color:${barColor};">${diffStr}</span>
+              <div class="diff-fill" style="width:${pct}%;background:${barColor};"></div>
+            </div>
+          </td>
+          <td style="color:var(--text-dim);">${m.vis}×</td>
+          <td><span style="font-size:0.75rem;font-weight:600;color:${alignColor};">${align}</span></td>
+        </tr>`;
+      }).join("")}
+    </tbody>
+  `;
+})();
+
+/* ══ LOGOS MURAL ══ */
+(function() {
+  const wrap = document.getElementById("logosMural");
+  if (!wrap) return;
+  medios.forEach(m => {
+    const borderColor = m.diff >= 3 ? "#f59e0b" : m.diff <= -3 ? "#3b82f6" : "#334155";
+    const diffStr = (m.diff > 0 ? "+" : "") + m.diff;
+    const diffColor = m.diff >= 3 ? "#f59e0b" : m.diff <= -3 ? "#60a5fa" : "#64748b";
+    const card = document.createElement("div");
+    const lowN = m.n < 20;
+    card.title = `${m.name} · Diferencial: ${diffStr}${lowN ? " · ⚠ Muestra pequeña (<20 artículos)" : ""}`;
+    card.style.cssText = `
+      display:flex;flex-direction:column;align-items:center;gap:0.4rem;
+      background:#111827;border:2px solid ${borderColor};
+      border-radius:10px;padding:0.65rem 0.6rem;
+      min-width:80px;max-width:90px;cursor:default;
+      transition:transform 0.15s,box-shadow 0.15s;
+    `;
+    card.onmouseenter = () => { card.style.transform = "translateY(-3px)"; card.style.boxShadow = `0 8px 24px ${borderColor}44`; };
+    card.onmouseleave = () => { card.style.transform = ""; card.style.boxShadow = ""; };
+
+    const img = document.createElement("img");
+    img.src = logoUrl(m.domain);
+    img.onerror = () => { img.onerror = null; img.src = faviconUrl(m.domain); };
+    img.alt = m.name;
+    img.style.cssText = "width:36px;height:36px;object-fit:contain;border-radius:6px;background:#fff;padding:2px;";
+
+    const nameEl = document.createElement("div");
+    nameEl.textContent = m.name;
+    nameEl.style.cssText = "font-size:0.6rem;color:#94a3b8;text-align:center;line-height:1.3;font-weight:500;";
+
+    const diffEl = document.createElement("div");
+    diffEl.textContent = diffStr;
+    diffEl.style.cssText = `font-size:0.75rem;font-weight:700;color:${diffColor};`;
+
+    card.appendChild(img);
+    card.appendChild(nameEl);
+    card.appendChild(diffEl);
+    if (lowN) {
+      const warn = document.createElement("div");
+      warn.textContent = "⚠ N<20";
+      warn.style.cssText = "font-size:0.58rem;color:#fbbf24;font-weight:600;";
+      card.appendChild(warn);
+    }
+    wrap.appendChild(card);
+  });
+})();
+
+/* ══ TAB SWITCHING ══ */
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  event.currentTarget.classList.add("active");
+}
+</script>
+</body>
+</html>
